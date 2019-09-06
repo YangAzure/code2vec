@@ -5,6 +5,8 @@ import torch.optim as optim
 import torch.nn as nn
 import torch.nn.functional as F
 
+import time
+
 import os
 import random 
 import pickle
@@ -27,7 +29,7 @@ LOG_DIR = 'logs'
 SAVE_DIR = 'checkpoints'
 LOG_PATH = os.path.join(LOG_DIR, f'{DATASET}-log.txt')
 MODEL_SAVE_PATH = os.path.join(SAVE_DIR, f'{DATASET}-model.pt')
-LOAD = True #set true if you want to load model from MODEL_SAVE_PATH
+LOAD = False #set true if you want to load model from MODEL_SAVE_PATH
 
 # set random seeds for reproducability
 
@@ -457,6 +459,9 @@ if os.path.exists(LOG_PATH):
 
 for epoch in range(N_EPOCHS):
 
+    # Recording the starting time of each epoch
+    epoch_starting_time = time.time()
+
     log = f'Epoch: {epoch+1:02} - Training'
     with open(LOG_PATH, 'a+') as f:
         f.write(log+'\n')
@@ -475,7 +480,10 @@ for epoch in range(N_EPOCHS):
         best_valid_loss = valid_loss
         torch.save(model.state_dict(), MODEL_SAVE_PATH)
     
-    log = f'| Epoch: {epoch+1:02} |\n'
+
+    # Recording the time used by the epoch.
+    epoch_time = time.time() - epoch_starting_time
+    log = f'| Epoch: {epoch+1:02} | Finishing Time: {epoch_time:.2f}s | \n'
     log += f'| Train Loss: {train_loss:.3f} | Train Precision: {train_p:.3f} | Train Recall: {train_r:.3f} | Train F1: {train_f1:.3f} | Train Acc: {train_acc*100:.2f}% |\n'
     log += f'| Val. Loss: {valid_loss:.3f} | Val. Precision: {valid_p:.3f} | Val. Recall: {valid_r:.3f} | Val. F1: {valid_f1:.3f} | Val. Acc: {valid_acc*100:.2f}% |'
     with open(LOG_PATH, 'a+') as f:
